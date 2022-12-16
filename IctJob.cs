@@ -7,17 +7,18 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Text.Json;
+using System.Security.Policy;
 
 namespace SeleniumScraper
 {
     public class IctJobListing
     {
-        private int _views;
+        private string _url;
 
-        public int Views
+        public string Url
         {
-            get { return _views; }
-            set { _views = value; }
+            get { return _url; }
+            set { _url = value; }
         }
         private string _title;
 
@@ -26,31 +27,51 @@ namespace SeleniumScraper
             get { return _title; }
             set { _title = value; }
         }
-        private string _uploader;
+        private string _company;
 
-        public string Uploader
+        public string Company
         {
-            get { return _uploader; }
-            set { _uploader = value; }
+            get { return _company; }
+            set { _company = value; }
         }
-        private string _url;
+        private string[] _locations;
 
-        public string Url
+        public string[] Locations
         {
-            get { return _url; }
-            set { _url = value; }
+            get { return _locations; }
+            set { _locations = value; }
+        }
+        private string[] _keywords;
+
+        public string[] Keywords
+        {
+            get { return _keywords; }
+            set { _keywords = value; }
         }
 
-        public IctJobListing( int views, string title, string uploader, string url)
+
+
+        public IctJobListing( string url, string title, string company, string[] locations, string[] keywords)
         {
-            _views = views;
-            _title = title;
-            _uploader = uploader;
             _url = url;
+            _title = title;
+            _company = company;
+            _locations = locations;
+            _keywords = keywords;
         }
         public override string ToString()
         {
-            return $"------\nUrl: {Url}\nTitle: {Title}\nUploader: {Uploader}\nViews: {Views}\n------";
+            string keywords = string.Empty;
+            foreach (var keyw in Keywords)
+            {
+                keywords += keyw.ToString() + ",";
+            }
+            string locations = string.Empty;
+            foreach (var keyw in Locations)
+            { 
+                locations += keyw.ToString() + ",";
+            }
+            return $"------\ntitle: {Title}\nurl: {Url}\ncompany: {Company}\nlocation(s): {locations}\nkeyword(s): {keywords.TrimEnd(',')}\n------";
         }
 
     }
@@ -60,18 +81,11 @@ namespace SeleniumScraper
         {
             Console.WriteLine("Search query: ");
             var searchquery = HttpUtility.HtmlEncode(Console.ReadLine());
-            List<IctJobListing> joblist = new List<IctJobListing>();
             Console.WriteLine("Starting to scrape requested data...");
+            IctJobListing[] joblistings = null;
             try
             {
-                string[] results = ScrapeIctJobListingTop5Search(searchquery, driver);
-                Thread.Sleep(1000);
-                foreach (var ictjob in results)
-                {
-                    var vid = ScrapeIctJobListingUrl(ictjob, driver);
-                    Console.WriteLine(vid);
-                    joblist.Add(vid);
-                }
+                joblistings = ScrapeIctJobListingTop5Search(searchquery, driver);
             }
             catch (Exception ex)
             {
@@ -95,23 +109,14 @@ namespace SeleniumScraper
             string extension = string.Empty;
             
             SaveFileDialog save = new SaveFileDialog();
-            save.Filter = "Csv File (.csv)|*.csv|Json File (.json)|*.json";
+            save.Filter = "Json File (.json)|*.json";
             if (save.ShowDialog() == DialogResult.OK)
             {
                 extension = Path.GetExtension(save.FileName);
-                MessageBox.Show(extension);
                 string data = string.Empty;
-                if (extension == ".csv")
+                if (extension == ".json")
                 {
-                    data = "Uploader;Url;Views;Title\n";
-                    foreach (var vid in joblist)
-                    {
-                        data += $"{vid.Uploader};{vid.Url};{vid.Views};{vid.Title}\n";
-                    }
-                }
-                else if (extension == ".json")
-                {
-                    data = JsonSerializer.Serialize(joblist);
+                    data = JsonSerializer.Serialize(joblistings);
                 }
                 using (StreamWriter writer = new StreamWriter(save.OpenFile()))
                 {
@@ -120,67 +125,16 @@ namespace SeleniumScraper
                         writer.Write(data[i]);
                     }
                 }
-                MessageBox.Show("works");
             }
 
             Console.WriteLine("Export as " + extension);
         }
-        private static IctJobListing ScrapeIctJobListingUrl(string yturl, IWebDriver driver)
-        {
-            string uploader;
-            string title;
-            int views;
 
-            driver.Navigate().GoToUrl(yturl);
-            Thread.Sleep(200);
-            if (yturl.Contains(".youtube.com/shorts"))
-            {
-                uploader = driver.FindElement(By.XPath("//*[@id=\"text-container\"]/yt-formatted-string/a")).GetAttribute("innerText");
-                title = driver.FindElement(By.XPath("//*[@id=\"overlay\"]/ytd-reel-player-header-renderer/h2/yt-formatted-string/span[1]")).GetAttribute("innerText");
-                string viewsraw = driver.FindElement(By.XPath("//*[@id=\"like-button\"]/yt-button-shape/label/div/span")).GetAttribute("innerText");
-                if (viewsraw.EndsWith("mln"))
-                {
-                    views = (int)(decimal.Parse(viewsraw.Split(" ")[0]) * (decimal)1000000);
-                }
-                else if (viewsraw.EndsWith("K"))
-                {
-                    views = (int)(decimal.Parse(viewsraw.Replace("K", "")) * (decimal)1000);
-                }
-                else
-                {
-                    views = int.Parse(viewsraw);
-                }
-            }
-            else
-            {
-                driver.FindElement(By.Id("description-inline-expander")).Click();
-                Thread.Sleep(100);
-                //get views
-                string viewsraw = driver.FindElement(By.XPath("//*[@id=\"info\"]/span[1]")).GetAttribute("innerText").Split(' ')[0].Replace(".", "");
-                if (viewsraw.EndsWith("mln"))
-                {
-                    views = (int)(decimal.Parse(viewsraw.Split(" ")[0]) * (decimal)1000000);
-                }
-                else if (viewsraw.EndsWith("K"))
-                {
-                    views = (int)(decimal.Parse(viewsraw.Replace("K", "")) * (decimal)1000);
-                }
-                else
-                {
-                    views = int.Parse(viewsraw);
-                }
-                uploader = driver.FindElement(By.XPath("//*[@id=\"channel-name\"]/div/div/yt-formatted-string/a")).GetAttribute("innerText");
-                title = driver.FindElement(By.XPath("//*[@id=\"title\"]/h1/yt-formatted-string")).GetAttribute("innerText");
-            }
-            var ytvid = new IctJobListing(views, title, uploader, yturl);
-            return ytvid;
-        }
-
-        private static string[] ScrapeIctJobListingTop5Search(string search, IWebDriver driver)
+        private static IctJobListing[] ScrapeIctJobListingTop5Search(string search, IWebDriver driver)
         {
             
             driver.Navigate().GoToUrl("https://www.ictjob.be/nl/it-vacatures-zoeken?keywords="+ search + "&keywords_options=OR&SortOrder=DESC&SortField=DATE&From=0&To=19");
-            List<string> joblisturls = new List<string>();
+            List<IctJobListing> joblisturls = new List<IctJobListing>();
             foreach (var item in driver.FindElements(By.XPath("//*[@id=\"search-result-body\"]/div/ul/li")))
             {
                 if (joblisturls.Count < 5)
@@ -188,14 +142,36 @@ namespace SeleniumScraper
                     var classes = item.GetAttribute("class");
                     if (!classes.Contains("create-job-alert-search-item"))
                     {
+                        string title=null, url = null, company = null, location = null, keywords = null;
                         foreach (var item2 in item.FindElements(By.TagName("a")))
                         {
+                            
                             if (item2.GetAttribute("itemprop") == "title")
                             {
-                                joblisturls.Add(item2.GetAttribute("href"));
+                                title = item2.GetAttribute("innerText");
+                                url = item2.GetAttribute("href");
+                                
                                 break;
                             }
                         }
+                        foreach (var span in item.FindElements(By.TagName("span")))
+                        {
+                            if(span.GetAttribute("class") == "job-company")
+                            {
+                                company = span.GetAttribute("innerText");
+                            }
+                            else if (span.GetAttribute("itemprop")=="addressLocality")
+                            {
+                                location = span.GetAttribute("innerText");
+                            }
+                            else if (span.GetAttribute("class")=="job-keywords")
+                            {
+                                keywords = span.GetAttribute("innerText");
+                            }
+                        }
+                        var joblisting = new IctJobListing(url, title, company,location.Split(','), keywords.Split(','));
+                        Console.WriteLine(joblisting);
+                        joblisturls.Add(joblisting);
                     }
                 }
                 else
