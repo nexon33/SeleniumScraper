@@ -94,7 +94,6 @@ namespace SeleniumScraper
             if (save.ShowDialog() == DialogResult.OK)
             {
                 extension = Path.GetExtension(save.FileName);
-                MessageBox.Show(extension);
                 string data = string.Empty;
                 if (extension == ".csv")
                 {
@@ -115,7 +114,6 @@ namespace SeleniumScraper
                         writer.Write(data[i]);
                     }
                 }
-                MessageBox.Show("works");
             }
 
             Console.WriteLine("Export as " + extension);
