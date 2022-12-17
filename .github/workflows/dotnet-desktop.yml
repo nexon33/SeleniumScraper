@@ -20,7 +20,6 @@ jobs:
       run: dotnet test
     - name: Create release
       uses: actions/create-release@v1
-      if: ${{ steps.changelog.outputs.skipped == 'false' }}
       id: create_release
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
