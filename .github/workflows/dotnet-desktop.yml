@@ -1,10 +1,10 @@
-name: .NET 6 C# CI
+name: .NET 6 publish
 
 on: [push]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v2
@@ -18,3 +18,25 @@ jobs:
       run: dotnet build --configuration Release
     - name: Test project
       run: dotnet test
+    - name: Create release
+      uses: actions/create-release@v1
+      id: create_release
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ steps.version.outputs.version  }}
+        draft: false
+        prerelease: false
+    - name: make zip
+      shell: pwsh
+      run: Compress-Archive -Path bin/Release/net6.0-windows/* -DestinationPath SeleniumScraper-windows.zip
+    - name: Upload release asset
+      uses: actions/upload-release-asset@v1
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path:  SeleniumScraper-windows.zip
+        asset_name:  SeleniumScraper-windows.zip
+        asset_content_type: application/zip
