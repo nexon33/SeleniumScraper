@@ -6,7 +6,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UseWindowsForms>True</UseWindowsForms>
-    <UseWPF>False</UseWPF>
   </PropertyGroup>
 
   <ItemGroup>
