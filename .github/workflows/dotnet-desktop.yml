@@ -18,8 +18,6 @@ jobs:
       run: dotnet build --configuration Release
     - name: Test project
       run: dotnet test
-    - name: Publish project
-      run: dotnet publish --configuration Release
     - name: Create release
       uses: actions/create-release@v1
       id: create_release
@@ -32,7 +30,7 @@ jobs:
         prerelease: false
     - name: make zip
       shell: pwsh
-      run: Compress-Archive -Path bin/Release/net6.0-windows/publish/* -DestinationPath SeleniumScraper-windows.zip
+      run: Compress-Archive -Path bin/Release/net6.0-windows/* -DestinationPath SeleniumScraper-windows.zip
     - name: Upload release asset
       uses: actions/upload-release-asset@v1
       env:
