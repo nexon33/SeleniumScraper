@@ -1,0 +1,20 @@
+name: .NET 6 C# CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET 6
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.100
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build project
+      run: dotnet build --configuration Release
+    - name: Test project
+      run: dotnet test
