@@ -22,11 +22,12 @@ jobs:
       run: dotnet publish --configuration Release
     - name: Create release
       uses: actions/create-release@v1
+      id: create_release
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
+        release_name: Release ${{ steps.version.outputs.version  }}
         draft: false
         prerelease: false
     - name: Upload release asset
