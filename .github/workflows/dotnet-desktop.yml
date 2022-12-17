@@ -19,7 +19,10 @@ jobs:
     - name: Test project
       run: dotnet test
     - name: Publish project
-      run: dotnet publish --configuration Release
+      run: dotnet publish --configuration Release .publish/SeleniumScraper
+    - name: make zip
+      shell: pwsh
+      run: Compress-Archive -Path .publish/SeleniumScraper/* -DestinationPath .publish/SeleniumScraper.zip
     - name: Create release
       uses: actions/create-release@v1
       env:
@@ -29,4 +32,4 @@ jobs:
         release_name: Release ${{ github.ref }}
         draft: false
         prerelease: false
-        artifacts: bin/Release/*
+        artifacts: ./publish/SeleniumScraper.zip
