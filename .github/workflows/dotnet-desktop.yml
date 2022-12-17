@@ -19,17 +19,20 @@ jobs:
     - name: Test project
       run: dotnet test
     - name: Publish project
-      run: dotnet publish --configuration Release -o .publish/SeleniumScraper
-    - name: make zip
-      shell: pwsh
-      run: Compress-Archive -Path .publish/SeleniumScraper/* -DestinationPath .publish/SeleniumScraper.zip
+      run: dotnet publish --configuration Release
     - name: Create release
       uses: actions/create-release@v1
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
+        token: ${{ secrets.GITHUB_TOKEN }}
         tag_name: ${{ github.ref }}
         release_name: Release ${{ github.ref }}
         draft: false
         prerelease: false
-        artifacts: ./publish/SeleniumScraper.zip
+    - name: Upload release asset
+      uses: actions/upload-release-asset@v2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        release_id: ${{ steps.create_release.outputs.id }}
+        asset_path: bin/Release
+        asset_name: release.zip
+        asset_content_type: application/zip
