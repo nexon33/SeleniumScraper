@@ -30,12 +30,16 @@ jobs:
         release_name: Release ${{ steps.version.outputs.version  }}
         draft: false
         prerelease: false
+    - name: make zip
+      shell: pwsh
+      run: Compress-Archive -Path .publish/SeleniumScraper/* -DestinationPath .publish/SeleniumScraper.zip
+      
     - name: Upload release asset
       uses: actions/upload-release-asset@v1
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: bin/Release
-        asset_name: release.zip
+        asset_path: .publish/SeleniumScraper.zip
+        asset_name: SeleniumScraper.zip
         asset_content_type: application/zip
