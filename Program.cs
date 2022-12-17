@@ -23,7 +23,7 @@ namespace SeleniumScraper
                 chromeDriverService.SuppressInitialDiagnosticInformation = true;
                 options.AddArgument("--disable-logging");
                 options.AddArgument("log-level=3");
-                //options.AddArgument("headless");
+                options.AddArgument("headless");
                 options.AddArgument("--mute-audio");
                 driver = new ChromeDriver(chromeDriverService, options);
                 driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
