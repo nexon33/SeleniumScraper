@@ -8,19 +8,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Increment Version
-      run: |
-          # Update the version number in the AssemblyInfo.cs file
-          $path = "Properties/AssemblyInfo.cs"
-          (Get-Content $path) | Foreach-Object {
-            $_ -replace 'AssemblyFileVersion\("(.*)"\)', ('AssemblyFileVersion("{0}")' -f [version]::new($matches[1]) )
-          } | Set-Content $path
-          # Commit the updated AssemblyInfo.cs file to the repository
-          git config --global user.email "actions@github.com"
-          git config --global user.name "GitHub Actions"
-          git add $path
-          git commit -m "Increment version number"
-          git push
     - name: Setup .NET 6
       uses: actions/setup-dotnet@v1
       with:
