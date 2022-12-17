@@ -18,3 +18,13 @@ jobs:
       run: dotnet build --configuration Release
     - name: Test project
       run: dotnet test
+    - name: Publish project
+      run: dotnet publish --configuration Release
+    - name: Create release
+      uses: actions/create-release@v1
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+        artifacts: bin/Release/*
