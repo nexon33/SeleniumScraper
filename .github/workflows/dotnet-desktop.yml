@@ -1,4 +1,4 @@
-name: .NET 6 C# CI
+name: .NET 6 publish
 
 on: [push]
 
