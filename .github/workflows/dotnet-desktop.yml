@@ -33,4 +33,3 @@ jobs:
         draft: false
         prerelease: false
         artifacts: ./publish/SeleniumScraper.zip
-        allowUpdates: true
