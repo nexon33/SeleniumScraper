@@ -19,7 +19,7 @@ jobs:
     - name: Test project
       run: dotnet test
     - name: Publish project
-      run: dotnet publish --configuration Release .publish/SeleniumScraper
+      run: dotnet publish --configuration Release -o .publish/SeleniumScraper
     - name: make zip
       shell: pwsh
       run: Compress-Archive -Path .publish/SeleniumScraper/* -DestinationPath .publish/SeleniumScraper.zip
