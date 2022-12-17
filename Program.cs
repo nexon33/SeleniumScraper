@@ -14,31 +14,17 @@ namespace SeleniumScraper
     internal static class Program
     {
         private static IWebDriver driver = null;
-
-        static bool ConsoleEventCallback(int eventType)
+        private static void ConsoleExit(object sender, EventArgs e)
         {
-            if (eventType == 2)
-            {
-                driver.Quit();
-            }
-            return false;
+            driver.Quit();
         }
-        static ConsoleEventDelegate handler;   // Keeps it from getting garbage collected
-                                               // Pinvoke
-        private delegate bool ConsoleEventDelegate(int eventType);
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern bool SetConsoleCtrlHandler(ConsoleEventDelegate callback, bool add);
 
-
-        /// <summary>Defines the entry point of the application.</summary>
-        /// 
         [STAThread]
         public static void Main()
         {
             if (driver == null)
             {
-                handler = new ConsoleEventDelegate(ConsoleEventCallback);
-                SetConsoleCtrlHandler(handler, true);
+                AppDomain.CurrentDomain.ProcessExit += new EventHandler(ConsoleExit);
                 ChromeOptions options = new ChromeOptions();
                 var chromeDriverService = ChromeDriverService.CreateDefaultService();
                 chromeDriverService.HideCommandPromptWindow = true;
