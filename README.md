@@ -9,4 +9,4 @@ The chrome selenium instance is configured to run headless and without sound and
 For the youtube scraper you can export the videos as .json or .csv and the scraper also supports youtube short videos. 
 The views count of the youtube videos gets converted to an integer for easy use.
 The ictjob results also seperates the keyword(s) and location(s) if applicable. 
-I did not add a 
+The amazon scraper does basically the same thing as the other scrapers, I did not convert the price to decimal because there are multiple currencies on amazon.
