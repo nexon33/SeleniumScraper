@@ -78,6 +78,7 @@ namespace SeleniumScraper
             IctJobListing[] joblistings = null;
             try
             {
+                //get the ictjoblisting data directly in array as all the data is readable from the object directly without visiting the url.
                 joblistings = ScrapeIctJobListingTop5Search(searchquery, driver);
             }
             catch (Exception ex)
@@ -86,6 +87,7 @@ namespace SeleniumScraper
                 Program.Main();
             }
             Console.WriteLine("Done with scraping...");
+            //export menu
             while (true)
             {
                 Console.WriteLine("Do you want to export the data?: (Y)es/(N)o");
@@ -100,7 +102,7 @@ namespace SeleniumScraper
                 }
             }
             string extension = string.Empty;
-            
+            //only supports json, location and keywords in json array
             SaveFileDialog save = new SaveFileDialog();
             save.Filter = "Json File (.json)|*.json";
             if (save.ShowDialog() == DialogResult.OK)
@@ -119,22 +121,23 @@ namespace SeleniumScraper
                     }
                 }
             }
-
-            Console.WriteLine("Export as " + extension);
         }
 
         private static IctJobListing[] ScrapeIctJobListingTop5Search(string search, IWebDriver driver)
         {
-            
+            //search
             driver.Navigate().GoToUrl("https://www.ictjob.be/nl/it-vacatures-zoeken?keywords="+ search + "&keywords_options=OR&SortOrder=DESC&SortField=DATE&From=0&To=19");
             List<IctJobListing> joblisturls = new List<IctJobListing>();
+            //loop through job elements
             foreach (var item in driver.FindElements(By.XPath("//*[@id=\"search-result-body\"]/div/ul/li")))
             {
                 if (joblisturls.Count < 5)
                 {
                     var classes = item.GetAttribute("class");
+                    //check if element is actual joblisting or not
                     if (!classes.Contains("create-job-alert-search-item"))
                     {
+                        //scrape data from joblisting
                         string title=null, url = null, company = null, location = null, keywords = null;
                         foreach (var item2 in item.FindElements(By.TagName("a")))
                         {
@@ -162,6 +165,7 @@ namespace SeleniumScraper
                                 keywords = span.GetAttribute("innerText");
                             }
                         }
+                        //add to data
                         var joblisting = new IctJobListing(url, title, company,location.Split(','), keywords.Split(','));
                         Console.WriteLine(joblisting);
                         joblisturls.Add(joblisting);
@@ -169,6 +173,7 @@ namespace SeleniumScraper
                 }
                 else
                 {
+                    //if scraped enough then break and return
                     break;
                 }
             }
